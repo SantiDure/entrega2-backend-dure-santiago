@@ -1,5 +1,5 @@
 import fs from "fs/promises";
-
+import fsSync from "fs";
 function notNull(valor) {
   if (valor === null || valor === undefined) {
     throw new Error("Hay valores invalidos");
@@ -32,27 +32,27 @@ class ProductManager {
   }
 
   //agrega un producto
-  addProduct({ title, description, price, thumbnail, code, stock }) {
-    const products = this.getProducts();
-
+  async addProduct({ title, description, price, thumbnail, code, stock }) {
+    const products = await this.getProducts();
+    const productToAdd = await products.find(
+      (product) => product.code === code
+    );
     // Verificar si ya existe un producto con el mismo código
-    if (products.some((product) => product.code === code)) {
-      throw new Error("El producto con el código especificado ya existe.");
+    if (!productToAdd) {
+      const id = this.newID();
+      const newProduct = new Product({
+        id,
+        title,
+        description,
+        price,
+        thumbnail,
+        code,
+        stock,
+      });
+      products.push(newProduct);
+      this.saveProducts(products);
+      return;
     }
-
-    const id = this.newID();
-    const newProduct = new Product({
-      id,
-      title,
-      description,
-      price,
-      thumbnail,
-      code,
-      stock,
-    });
-    products.push(newProduct);
-    this.saveProducts(products);
-    return newProduct;
   }
 
   //consultar por todos los productos
@@ -67,57 +67,69 @@ class ProductManager {
   }
 
   //consultar por un producto especificado por id
-  getProductById(id) {
-    const products = this.getProducts();
+  async getProductById(id) {
+    const products = await this.getProducts();
     const productToFind = products.find((p) => p.id === id);
     if (!productToFind) {
       throw new Error(`El producto con id ${id} no se encuentra o no existe`);
     }
-    return productToFind;
+    return { productToFind };
   }
 
-  updateProduct(id, newProduct) {
-    const products = this.getProducts();
+  async updateProduct(
+    id,
+    newTitle,
+    newDescription,
+    newPrice,
+    newThumbnail,
+    newCode,
+    newStock
+  ) {
+    const products = await this.getProducts();
     const productIndex = products.findIndex((i) => i.id === id);
     if (productIndex !== -1) {
-      newProduct.id = id;
-      this.saveProducts(products);
-      return newProduct;
+      const newData = {
+        id: products[productIndex].id,
+        title: newTitle,
+        description: newDescription,
+        price: newPrice,
+        thumbnail: newThumbnail,
+        code: newCode,
+        stock: newStock,
+      };
+
+      products[productIndex] = newData;
+
+      this.saveProducts(products); // Añadir await aquí
+
+      return;
+    } else {
+      throw new Error(`El producto con id ${id} no se encuentra o no existe`);
     }
-    throw new Error(`El producto con id ${id} no se encuentra o no existe`);
   }
 
-  deleteProduct(id) {
-    const products = this.getProducts();
+  async deleteProduct(id) {
+    const products = await this.getProducts();
     const productIndex = products.findIndex((i) => i.id === id);
     if (productIndex !== -1) {
       products.splice(productIndex, 1);
       this.saveProducts(products);
       return;
     }
-    throw new Error(`El producto con id ${id} no se encuentra o no existe`);
   }
 
-  async saveProducts(products) {
-    await fs.writeFile(this.path, JSON.stringify(products, null, 2), "utf8");
-  }
-}
-
-async function leerDatos() {
-  try {
-    const data = await pm.getProducts();
-    console.log(data);
-  } catch (error) {
-    throw new Error(
-      `No se pudo leer la data por el siguiente error -> ${error}`
-    );
+  saveProducts(products) {
+    fsSync.writeFileSync(this.path, JSON.stringify(products, null, 2), "utf8");
   }
 }
 
 const pm = new ProductManager("./db/products.json");
 
+/*
 const productos = await pm.getProducts();
+
 console.log(productos);
+
 pm.addProduct({
   title: "producto prueba",
   description: "Este es un producto prueba",
@@ -127,7 +139,21 @@ pm.addProduct({
   stock: 25,
 });
 
-/*
-leerDatos();
+const productoBuscado = await pm.getProductById(1);
+console.log(productoBuscado);
 
+*/
+
+/*pm.updateProduct(
+  1,
+  "producto prueba editado con update product2",
+  "Este es un producto prueba editado2",
+  2002,
+  "Sin imagen2",
+  "abc1234562",
+  25
+  );
+  */
+/*
+pm.deleteProduct(1);
 */
