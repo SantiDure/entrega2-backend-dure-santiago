@@ -1,0 +1,13 @@
+{
+  "type": "module",
+  "name": "ejercicio2",
+  "version": "1.0.0",
+  "description": "",
+  "main": "Entrega2-SantiagoDure.js",
+  "scripts": {
+    "start":"nodemon Entrega2-SantiagoDure.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}
