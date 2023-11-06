@@ -3,11 +3,11 @@
   "name": "ejercicio2",
   "version": "1.0.0",
   "description": "",
-  "main": "Entrega2-SantiagoDure.js",
+  "main": "src/main.js",
   "scripts": {
-    "start":"nodemon Entrega2-SantiagoDure.js"
+    "start":"nodemon src/main.js"
   },
   "keywords": [],
-  "author": "",
+  "author": "Santiago Duré",
   "license": "ISC"
 }

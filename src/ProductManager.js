@@ -1,24 +1,7 @@
 import fs from "fs/promises";
-function notNull(valor) {
-  if (valor === null || valor === undefined) {
-    throw new Error("Hay valores invalidos");
-  }
-  return valor;
-}
+import { Product } from "./Product.js";
 
-class Product {
-  constructor({ id, title, description, price, thumbnail, code, stock }) {
-    this.id = notNull(id);
-    this.title = notNull(title);
-    this.description = notNull(description);
-    this.price = notNull(price);
-    this.thumbnail = notNull(thumbnail);
-    this.code = notNull(code);
-    this.stock = notNull(stock);
-  }
-}
-
-class ProductManager {
+export class ProductManager {
   constructor(path) {
     this.path = path;
     this.ultimoID = 0;
@@ -76,7 +59,7 @@ class ProductManager {
     if (productIndex !== -1) {
       const product = products[productIndex];
       products[productIndex] = { ...product, ...newData };
-      await fs.writeFile(this.path, JSON.stringify(products));
+      await fs.writeFile(this.path, JSON.stringify(products), null, 2);
       return;
     }
   }
@@ -91,39 +74,3 @@ class ProductManager {
     }
   }
 }
-
-const pm = new ProductManager("./db/products.json");
-
-/*
-const productos = await pm.getProducts();
-
-console.log(productos);
-
-await pm.addProduct({
-  title: "producto prueba",
-  description: "Este es un producto prueba",
-  price: 200,
-  thumbnail: "Sin imagen",
-  code: "abc123",
-  stock: 25,
-});
-
-const productoBuscado = await pm.getProductById(1);
-console.log(productoBuscado);
-
-*/
-
-/*
-pm.updateProduct(1, {
-  title: "producto prueba editado con update product2",
-  description: "Este es un producto prueba editado2",
-  price: 2002,
-  thumbnail: "Sin imagen2",
-  code: "abc1234562",
-  stock: 25,
-});
- */
-
-pm.deleteProduct(1);
-/*
- */
