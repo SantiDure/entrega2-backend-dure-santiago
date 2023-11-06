@@ -1,5 +1,7 @@
 import { ProductManager } from "./ProductManager.js";
 
+// TESTING
+
 const pm = new ProductManager("./db/products.json");
 /*
 
@@ -16,7 +18,7 @@ await pm.addProduct({
   stock: 25,
 });
 
-const productoBuscado = await pm.getProductById(1);
+const productoBuscado = await pm.getProductById(3);
 console.log(productoBuscado);
 
 */
@@ -33,5 +35,5 @@ pm.updateProduct(1, {
 
  */
 /*
+pm.deleteProduct(54);
  */
-pm.deleteProduct(1);

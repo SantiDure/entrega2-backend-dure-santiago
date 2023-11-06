@@ -19,22 +19,25 @@ export class ProductManager {
     const productToAdd = await products.find(
       (product) => product.code === code
     );
+    const id = this.newID();
+    const newProduct = new Product({
+      id,
+      title,
+      description,
+      price,
+      thumbnail,
+      code,
+      stock,
+    });
     // Verificar si ya existe un producto con el mismo código
     if (!productToAdd) {
-      const id = this.newID();
-      const newProduct = new Product({
-        id,
-        title,
-        description,
-        price,
-        thumbnail,
-        code,
-        stock,
-      });
       products.push(newProduct);
       await fs.writeFile(this.path, JSON.stringify(products, null, 2));
       return;
     }
+    throw new Error(
+      `El producto con el codigo ${code} ya existe, no puede volver a agregarse`
+    );
   }
 
   //consultar por todos los productos
@@ -72,5 +75,6 @@ export class ProductManager {
       await fs.writeFile(this.path, JSON.stringify(products, null, 2), "utf8");
       return products;
     }
+    throw new Error(`El producto con id ${id} no se encuentra o no existe`);
   }
 }
