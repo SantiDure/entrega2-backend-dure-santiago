@@ -1,5 +1,4 @@
 import fs from "fs/promises";
-import fsSync from "fs";
 function notNull(valor) {
   if (valor === null || valor === undefined) {
     throw new Error("Hay valores invalidos");
@@ -50,20 +49,15 @@ class ProductManager {
         stock,
       });
       products.push(newProduct);
-      this.saveProducts(products);
+      await fs.writeFile(this.path, JSON.stringify(products, null, 2));
       return;
     }
   }
 
   //consultar por todos los productos
   async getProducts() {
-    try {
-      const data = await fs.readFile(this.path, "utf-8");
-      return JSON.parse(data);
-    } catch (error) {
-      console.log(`no se pudieron traer los datos, error ${error}`);
-      return [];
-    }
+    const data = await fs.readFile(this.path, "utf-8");
+    return JSON.parse(data) || [];
   }
 
   //consultar por un producto especificado por id
@@ -73,38 +67,17 @@ class ProductManager {
     if (!productToFind) {
       throw new Error(`El producto con id ${id} no se encuentra o no existe`);
     }
-    return { productToFind };
+    return productToFind;
   }
 
-  async updateProduct(
-    id,
-    newTitle,
-    newDescription,
-    newPrice,
-    newThumbnail,
-    newCode,
-    newStock
-  ) {
+  async updateProduct(id, newData) {
     const products = await this.getProducts();
     const productIndex = products.findIndex((i) => i.id === id);
     if (productIndex !== -1) {
-      const newData = {
-        id: products[productIndex].id,
-        title: newTitle,
-        description: newDescription,
-        price: newPrice,
-        thumbnail: newThumbnail,
-        code: newCode,
-        stock: newStock,
-      };
-
-      products[productIndex] = newData;
-
-      this.saveProducts(products); // Añadir await aquí
-
+      const product = products[productIndex];
+      products[productIndex] = { ...product, ...newData };
+      await fs.writeFile(this.path, JSON.stringify(products));
       return;
-    } else {
-      throw new Error(`El producto con id ${id} no se encuentra o no existe`);
     }
   }
 
@@ -113,13 +86,9 @@ class ProductManager {
     const productIndex = products.findIndex((i) => i.id === id);
     if (productIndex !== -1) {
       products.splice(productIndex, 1);
-      this.saveProducts(products);
-      return;
+      await fs.writeFile(this.path, JSON.stringify(products, null, 2), "utf8");
+      return products;
     }
-  }
-
-  saveProducts(products) {
-    fsSync.writeFileSync(this.path, JSON.stringify(products, null, 2), "utf8");
   }
 }
 
@@ -130,7 +99,7 @@ const productos = await pm.getProducts();
 
 console.log(productos);
 
-pm.addProduct({
+await pm.addProduct({
   title: "producto prueba",
   description: "Este es un producto prueba",
   price: 200,
@@ -144,16 +113,17 @@ console.log(productoBuscado);
 
 */
 
-/*pm.updateProduct(
-  1,
-  "producto prueba editado con update product2",
-  "Este es un producto prueba editado2",
-  2002,
-  "Sin imagen2",
-  "abc1234562",
-  25
-  );
-  */
 /*
+pm.updateProduct(1, {
+  title: "producto prueba editado con update product2",
+  description: "Este es un producto prueba editado2",
+  price: 2002,
+  thumbnail: "Sin imagen2",
+  code: "abc1234562",
+  stock: 25,
+});
+ */
+
 pm.deleteProduct(1);
-*/
+/*
+ */
