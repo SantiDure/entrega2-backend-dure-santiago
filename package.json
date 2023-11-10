@@ -5,10 +5,13 @@
   "description": "",
   "main": "src/main.js",
   "scripts": {
-    "start":"node src/main.js",
-    "dev":"nodemon -e 'js'."
+    "start": "node src/main.js",
+    "dev": "nodemon src/app.js"
   },
   "keywords": [],
   "author": "Santiago Duré",
-  "license": "ISC"
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.18.2"
+  }
 }

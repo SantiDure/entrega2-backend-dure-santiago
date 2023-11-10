@@ -1,25 +1,18 @@
 import fs from "fs/promises";
 import { Product } from "./Product.js";
-
+import crypto from "crypto";
 export class ProductManager {
   constructor(path) {
     this.path = path;
-    this.ultimoID = 0;
   }
 
   //crea un id auto incrementable
-  newID() {
-    this.ultimoID++;
-    return this.ultimoID;
-  }
 
   //agrega un producto
   async addProduct({ title, description, price, thumbnail, code, stock }) {
     const products = await this.getProducts();
-    const productToAdd = await products.find(
-      (product) => product.code === code
-    );
-    const id = this.newID();
+    const productToAdd = products.find((product) => product.code === code);
+    const id = crypto.randomUUID();
     const newProduct = new Product({
       id,
       title,
@@ -32,7 +25,7 @@ export class ProductManager {
     // Verificar si ya existe un producto con el mismo código
     if (!productToAdd) {
       products.push(newProduct);
-      await fs.writeFile(this.path, JSON.stringify(products, null, 2));
+      await fs.writeFile(this.path, JSON.stringify(products, null, 2), "utf-8");
       return;
     }
     throw new Error(
@@ -61,8 +54,18 @@ export class ProductManager {
     const productIndex = products.findIndex((i) => i.id === id);
     if (productIndex !== -1) {
       const product = products[productIndex];
-      products[productIndex] = { ...product, ...newData };
-      await fs.writeFile(this.path, JSON.stringify(products), null, 2);
+      try {
+        products[productIndex] = { ...product, ...newData };
+        await fs.writeFile(
+          this.path,
+          JSON.stringify(products, null, 2),
+          "utf-8"
+        );
+      } catch (error) {
+        throw new Error(
+          `Error al actualizar el producto, faltan campos a rellenar: ${error}`
+        );
+      }
       return;
     }
   }
